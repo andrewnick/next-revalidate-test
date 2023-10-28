@@ -12,3 +12,8 @@ export async function GET() {
 
   return Response.json({ message: "Success" });
 }
+
+export async function POST(req: Request) {
+  revalidateTag("navigation"); // Purge all data with the 'blog' tag
+  return Response.json({ revalidated: true, now: Date.now() });
+}
