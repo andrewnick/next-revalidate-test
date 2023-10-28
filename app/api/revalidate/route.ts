@@ -10,7 +10,7 @@ export async function GET() {
 
   revalidateTag("navigation");
 
-  await fetch("https://next-revalidate-test-delta.vercel.app/");
+  // await fetch("https://next-revalidate-test-delta.vercel.app/");
   // const data = await response.json();
   // console.log({ data });
 
