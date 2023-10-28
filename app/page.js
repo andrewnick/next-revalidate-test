@@ -2,21 +2,54 @@ import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
-// async function getData() {
-//   const res = await fetch("http://localhost:3000/api/data", {
-//     cache: "force-cache",
-//     next: { tags: ["data"] },
-//   });
-//   // The return value is *not* serialized
-//   // You can return Date, Map, Set, etc.
+import { useRouter, usePathname } from "next/navigation";
+import { debounce } from "lodash";
 
-//   if (!res.ok) {
-//     // This will activate the closest `error.js` Error Boundary
-//     throw new Error("Failed to fetch data");
-//   }
+export function useDataRevalidator({ timeout = 5000 }) {
+  const router = useRouter();
+  const pathname = usePathname();
 
-//   return res.json();
-// }
+  const getRefresher = useCallback(
+    () =>
+      debounce(
+        () => {
+          // Can be removed, just to showcase when it triggers refresh
+          console.log(
+            `[${new Date().toLocaleTimeString()}] Triggering router.refresh()...`
+          );
+          router.refresh();
+        },
+        timeout,
+        { leading: false, trailing: true }
+      ),
+    [router, timeout]
+  );
+
+  // Trigger router.refresh() whenever `pathname` changes.
+  // Note: this does not cover searchParams, you can add `useSearchParams` if needed.
+  useEffect(() => {
+    const refresher = getRefresher();
+    refresher();
+  }, [revalidate, pathname]);
+
+  // Trigger router.refresh() when focus goes back to the window (similar to useSWR / react-query)
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      return;
+    }
+
+    const refresher = getRefresher();
+
+    window.addEventListener("focus", refresher);
+    return () => {
+      refresher.cancel();
+      window.removeEventListener("focus", refresher);
+    };
+  }, [revalidate]);
+
+  return null;
+}
+
 async function getData() {
   let QUERY = encodeURIComponent('*[_type == "navigation"]');
   const NEXT_PUBLIC_PROJECT_ID = "9882luw6";
@@ -41,6 +74,7 @@ async function getData() {
 }
 
 export default async function Home() {
+  useDataRevalidator({ timeout: 5000 });
   const data = await getData();
 
   console.log({ result: data.result[0]?.links[0]?.label });
