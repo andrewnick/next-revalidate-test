@@ -14,6 +14,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  revalidateTag("navigation"); // Purge all data with the 'blog' tag
+  console.log("revalidating post");
+  revalidateTag("navigation");
   return Response.json({ revalidated: true, now: Date.now() });
 }
