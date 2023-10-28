@@ -1,8 +1,54 @@
-import Image from 'next/image'
+import Image from "next/image";
 
-export default function Home() {
+// async function getData() {
+//   const res = await fetch("http://localhost:3000/api/data", {
+//     cache: "force-cache",
+//     next: { tags: ["data"] },
+//   });
+//   // The return value is *not* serialized
+//   // You can return Date, Map, Set, etc.
+
+//   if (!res.ok) {
+//     // This will activate the closest `error.js` Error Boundary
+//     throw new Error("Failed to fetch data");
+//   }
+
+//   return res.json();
+// }
+async function getData() {
+  let QUERY = encodeURIComponent('*[_type == "navigation"]');
+  const NEXT_PUBLIC_PROJECT_ID = "9882luw6";
+  const DATASET = "staging";
+  // Compose the URL for your project's endpoint and add the query
+  let URL = `https://${NEXT_PUBLIC_PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+
+  const res = await fetch(URL, {
+    cache: "force-cache",
+    next: { tags: ["navigation"] },
+  });
+  // The return value is *not* serialized
+  // You can return Date, Map, Set, etc.
+
+  if (!res.ok) {
+    console.log({ res });
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export default async function Home() {
+  const data = await getData();
+
+  console.log({ result: data.result[0]?.links[0]?.label });
+  // console.log({ result: data.result?.links[0]?.title });
+  const result = data.result[0]?.links[0]?.label;
+  console.log({ result });
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <h1>{JSON.stringify(result)}</h1>
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
         <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           Get started by editing&nbsp;
@@ -15,7 +61,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            By{' '}
+            By{" "}
             <Image
               src="/vercel.svg"
               alt="Vercel Logo"
@@ -47,7 +93,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
+            Docs{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -64,7 +110,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
+            Learn{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -81,7 +127,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
+            Templates{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -98,7 +144,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
+            Deploy{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -109,5 +155,5 @@ export default function Home() {
         </a>
       </div>
     </main>
-  )
+  );
 }
